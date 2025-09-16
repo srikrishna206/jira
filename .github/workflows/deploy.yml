@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Backend build
       - name: Set up Python
@@ -48,8 +48,9 @@ jobs:
       - name: Archive production artifacts
         run: |
           tar -czf build-artifacts.tar.gz backend frontend docker-compose.yml
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: build-artifacts.tar.gz
@@ -61,7 +62,7 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-artifacts
           path: .
@@ -69,18 +70,16 @@ jobs:
       - name: Extract artifact
         run: tar -xzf build-artifacts.tar.gz
 
-      - name: Deploy to AWS EC2
+      - name: Clean old files on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            cd /home/${{ secrets.AWS_USER }}/app   # Path where you want to deploy
+            cd /home/${{ secrets.AWS_USER }}/app
             rm -rf backend frontend docker-compose.yml
-            mkdir -p backend frontend
-            # Upload new files
-            exit
+
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
