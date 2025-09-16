@@ -73,7 +73,7 @@ jobs:
       - name: List extracted files (debug)
         run: ls -R .
 
-      - name: Clean old files on EC2
+      - name: Clean old files on EC2 with sudo
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AWS_HOST }}
@@ -81,7 +81,7 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd /home/${{ secrets.AWS_USER }}/app
-            rm -rf backend frontend docker-compose.yml
+            sudo rm -rf backend frontend docker-compose.yml
 
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -89,8 +89,18 @@ jobs:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
-          source: "backend/,frontend/,docker-compose.yml"
+          source: "./backend/*,./frontend/*,./docker-compose.yml"
           target: "/home/${{ secrets.AWS_USER }}/app"
+
+      - name: Fix permissions on EC2 (optional but recommended)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.AWS_USER }}/app
+            sudo chown -R $USER:$USER .
 
       - name: Restart containers with sudo
         uses: appleboy/ssh-action@v1.0.3
