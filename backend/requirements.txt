@@ -3,3 +3,11 @@ uvicorn[standard]
 sqlmodel
 pydantic
 python-multipart
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+alembic
+python-dotenv
+psycopg2-binary    # if using PostgreSQL
+mysqlclient        # if using MySQL
